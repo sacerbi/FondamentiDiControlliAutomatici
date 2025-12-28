@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include "matplotlibcpp.h"
+#include "myDiffEquation.h"
 
 namespace plt = matplotlibcpp;
 
@@ -20,7 +21,7 @@ struct Params {
 // --------------------------
 // Equazione differenziale - Controllore proporzionale
 // --------------------------
-std::vector<double> f_prop(double t, const std::vector<double>& x, const Params& p) {
+std::vector<double> f_prop(double t, const std::vector<double>& x, const Params& p, double dummy) {
     (void)t; // unused
     std::vector<double> dx(1);
     dx[0] = -(p.a + p.b * p.mu) * x[0] + p.b * p.mu * p.Cbar;
@@ -30,54 +31,12 @@ std::vector<double> f_prop(double t, const std::vector<double>& x, const Params&
 // --------------------------
 // Equazione differenziale - Controllore integrale
 // --------------------------
-std::vector<double> f_int(double t, const std::vector<double>& x, const Params& p) {
+std::vector<double> f_int(double t, const std::vector<double>& x, const Params& p, double dummy) {
     (void)t;
     std::vector<double> dx(2);
     dx[0] = -p.a * x[0] + p.b * x[1];          // Cdot
     dx[1] = p.mu * p.Cbar - p.mu * x[0];       // Idot
     return dx;
-}
-
-// --------------------------
-// Operatori utili
-// --------------------------
-std::vector<double> operator+(const std::vector<double>& a, const std::vector<double>& b) {
-    std::vector<double> r(a.size());
-    for (size_t i = 0; i < a.size(); ++i) r[i] = a[i] + b[i];
-    return r;
-}
-std::vector<double> operator*(const std::vector<double>& a, double s) {
-    std::vector<double> r(a.size());
-    for (size_t i = 0; i < a.size(); ++i) r[i] = a[i] * s;
-    return r;
-}
-
-// --------------------------
-// Runge–Kutta 4° ordine
-// --------------------------
-template <typename Func>
-std::vector<std::vector<double>> rungeKutta4(Func f, std::vector<double> x0,
-                                             double t0, double tf, double dt, const Params& p) {
-    int N = static_cast<int>((tf - t0) / dt);
-    std::vector<std::vector<double>> result;
-    result.reserve(N + 1);
-
-    std::vector<double> x = x0;
-    double t = t0;
-    result.push_back(x);
-
-    for (int i = 0; i < N; ++i) {
-        auto k1 = f(t, x, p);
-        auto k2 = f(t + dt / 2, x + k1 * (dt / 2), p);
-        auto k3 = f(t + dt / 2, x + k2 * (dt / 2), p);
-        auto k4 = f(t + dt, x + k3 * dt, p);
-
-        x = x + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        t += dt;
-        result.push_back(x);
-    }
-
-    return result;
 }
 
 // --------------------------
@@ -101,7 +60,8 @@ int main() {
     std::map<double, std::vector<double>> Cprop;
     for (auto mu : mus_prop) {
         Params p{a, b, mu, Cbar};
-        auto traj = rungeKutta4(f_prop, {0.0}, t0, tf, dt, p);
+        double dummy = 0.0;
+        auto traj = rungeKutta4(f_prop, {0.0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj) C.push_back(x[0]);
         Cprop[mu] = C;
@@ -130,7 +90,8 @@ int main() {
     std::map<double, std::vector<double>> Cint;
     for (auto mu : mus_int) {
         Params p{a, b, mu, Cbar};
-        auto traj = rungeKutta4(f_int, {0.0, 0.0}, t0, tf, dt, p);
+        double dummy = 0.0;
+        auto traj = rungeKutta4(f_int, {0.0, 0.0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj) C.push_back(x[0]);
         Cint[mu] = C;

@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include "matplotlibcpp.h"
+#include "myDiffEquation.h"
 
 namespace plt = matplotlibcpp;
 
@@ -22,54 +23,12 @@ struct Params {
 // --------------------------
 // Equazione differenziale - Controllore ad anello chiuso
 // --------------------------
-std::vector<double> f_anelloChiuso(double t, const std::vector<double>& x, const Params& p) {
+std::vector<double> f_anelloChiuso(double t, const std::vector<double>& x, const Params& p, double& dummy) {
     (void)t; // unused
     std::vector<double> dx(2);
     dx[0] = x[1];
     dx[1] = -(p.hbar/p.Mbar) * x[1] - ((p.kbar + p.mu)/p.Mbar * x[0]) + ((p.kbar + p.mu)/p.Mbar) * p.sbar + p.dFe/p.Mbar;
     return dx;
-}
-
-// --------------------------
-// Operatori utili
-// --------------------------
-std::vector<double> operator+(const std::vector<double>& a, const std::vector<double>& b) {
-    std::vector<double> r(a.size());
-    for (size_t i = 0; i < a.size(); ++i) r[i] = a[i] + b[i];
-    return r;
-}
-std::vector<double> operator*(const std::vector<double>& a, double s) {
-    std::vector<double> r(a.size());
-    for (size_t i = 0; i < a.size(); ++i) r[i] = a[i] * s;
-    return r;
-}
-
-// --------------------------
-// Runge–Kutta 4° ordine
-// --------------------------
-template <typename Func>
-std::vector<std::vector<double>> rungeKutta4(Func f, std::vector<double> x0,
-                                             double t0, double tf, double dt, const Params& p) {
-    int N = static_cast<int>((tf - t0) / dt);
-    std::vector<std::vector<double>> result;
-    result.reserve(N + 1);
-
-    std::vector<double> x = x0;
-    double t = t0;
-    result.push_back(x);
-
-    for (int i = 0; i < N; ++i) {
-        auto k1 = f(t, x, p);
-        auto k2 = f(t + dt / 2, x + k1 * (dt / 2), p);
-        auto k3 = f(t + dt / 2, x + k2 * (dt / 2), p);
-        auto k4 = f(t + dt, x + k3 * dt, p);
-
-        x = x + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        t += dt;
-        result.push_back(x);
-    }
-
-    return result;
 }
 
 // --------------------------
@@ -91,7 +50,8 @@ int main() {
     std::map<double, std::vector<double>> risultatiControllore;
     for (auto mu : mus_prop) {
         Params p{Mbar, hbar, kbar, dFe, sbar, mu};
-        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p);
+        double dummy = 0.0; // to match function signature
+        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj) C.push_back(x[0]);
         risultatiControllore[mu] = C;
@@ -118,7 +78,8 @@ int main() {
     double v0 = 1.0;
     for (auto mu : mus_prop) {
         Params p{Mbar, hbar, kbar, dFe, sbar, mu};
-        auto traj = rungeKutta4(f_anelloChiuso, {s0, v0}, t0, tf, dt, p);
+        double dummy = 0.0; // to match function signature
+        auto traj = rungeKutta4(f_anelloChiuso, {s0, v0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj) C.push_back(x[0]);
         risultatiControllore[mu] = C;
@@ -138,7 +99,8 @@ int main() {
     dFe = 1.0;
     for (auto mu : mus_prop) {
         Params p{Mbar, hbar, kbar, dFe, sbar, mu};
-        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p);
+        double dummy = 0.0; // to match function signature
+        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj) C.push_back(x[0]);
         risultatiControllore[mu] = C;
@@ -162,7 +124,8 @@ int main() {
     dFe = 0.0;
     for (auto mu : mus_prop) {
         Params p{Mbar, hbar, kbar, dFe, sbar, mu};
-        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p);
+        double dummy = 0.0; // to match function signature
+        auto traj = rungeKutta4(f_anelloChiuso, {0.0, 0.0}, t0, tf, dt, p, dummy);
         std::vector<double> C;
         for (auto& x : traj){
             double Fm = kbar * sbar + dFe + mu * (sbar - x[0]);
