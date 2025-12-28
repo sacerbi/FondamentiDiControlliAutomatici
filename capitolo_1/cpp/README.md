@@ -1,7 +1,7 @@
 # Istruzioni per la compilazione
 
 Per compilare il programma è sufficiente il comando:
-<code>g++ Esercizio1_2.cpp -o Esercizio1_2 -I/usr/include/python3.12 -I/usr/lib/python3/dist-packages/numpy/core/include -lpython3.12 -std=c++17 </code>
+<code>g++ EsercizioX_Y.cpp -o EsercizioX_Y -I/usr/include/python3.12 -I/usr/lib/python3/dist-packages/numpy/core/include -lpython3.12 -std=c++17 </code>
 
 In caso di errori, verificare i requisiti:
 * <code>sudo apt-get install python3-numpy</code>
