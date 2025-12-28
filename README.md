@@ -24,9 +24,9 @@ Ad esempio:
 
 * `capitolo_1/`
     * `octave/`
-        *`esercizio_1_2.m`
+        * `esercizio_1_2.m`
     * `cpp/`
-        *`esercizio_1_2.cpp`
+        * `esercizio_1_2.cpp`
 * `capitolo_2/`
     * `...`
 
