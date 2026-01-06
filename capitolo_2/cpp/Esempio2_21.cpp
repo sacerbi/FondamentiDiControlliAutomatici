@@ -62,7 +62,6 @@ int main() {
             x1.push_back(v[0]);
             x2.push_back(v[1]);
         }
-        std::cout << "Simulazione " << i+1 << " completata. x1.size() = " << x1.size() << ", x2.size() = " << x2.size() << std::endl;
         evoluzioni[{x1_0[i], x2_0[i]}] = Evoluzione{x1, x2};
     }
     
@@ -71,8 +70,6 @@ int main() {
     for (auto& [chiave, evoluzione] : evoluzioni) {
         const auto& x1 = evoluzione.x1;
         const auto& x2 = evoluzione.x2;
-        std::cout << "Plot simulazione " << chiave.first << std::endl;
-        std::cout << "x1.size() = " << x1.size() << ", x2.size() = " << x2.size() << "\n" << std::endl;
         plt::plot(x1, x2, {{"label", "x1_0 = " + std::to_string(chiave.first) + ", x2_0 = " + std::to_string(chiave.second)}});
     }
     plt::xlabel("x1 (Tensione sul condensatore)");

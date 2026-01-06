@@ -23,10 +23,6 @@ function Esempio2_21()
     legends{i} = ['x_1(0) = ' num2str(x1_0(i)) ', x_2(0) = ' num2str(x2_0(i))];
   endfor
 
-  tmp = evoluzioniX1{1};
-  size(tmp)
-
-
   figure
   grid
   hold on
