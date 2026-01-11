@@ -79,5 +79,7 @@ int main() {
     plt::grid(true);
     plt::show();
 
+    plt::detail::_interpreter::kill();
+
     return 0;
 }
