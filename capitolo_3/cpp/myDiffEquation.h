@@ -69,6 +69,70 @@ std::vector<std::vector<double>> rungeKutta4(Func f, std::vector<double> x0,
     return result;
 }
 
+// Moltiplica matrice * vettore
+std::vector<double> matVec(const std::vector<std::vector<double>> &M,
+                           const std::vector<double> &v)
+{
+    size_t rows = M.size(), cols = v.size();
+    std::vector<double> result(rows, 0.0);
+    for (size_t i = 0; i < rows; i++)
+        for (size_t j = 0; j < cols; j++)
+            result[i] += M[i][j] * v[j];
+    return result;
+}
+
+// Somma due vettori
+std::vector<double> vecAdd(const std::vector<double> &a,
+                           const std::vector<double> &b)
+{
+    std::vector<double> result(a.size());
+    for (size_t i = 0; i < a.size(); i++)
+        result[i] = a[i] + b[i];
+    return result;
+}
+
+// Moltiplica vettore per scalare
+std::vector<double> vecScale(const std::vector<double> &v, double s)
+{
+    std::vector<double> result(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+        result[i] = v[i] * s;
+    return result;
+}
+
+std::vector<double> lsim(
+    const std::vector<std::vector<double>> &A,
+    const std::vector<std::vector<double>> &B,
+    const std::vector<std::vector<double>> &C,
+    const std::vector<std::vector<double>> &D,
+    const std::vector<double> &u, // segnale di ingresso
+    const std::vector<double> &t) // vettore tempi
+{
+    size_t n = A.size();     // dimensione stato
+    double dt = t[1] - t[0]; // passo temporale
+
+    std::vector<double> x(n, 0.0); // stato iniziale = 0
+    std::vector<double> y;         // output
+
+    for (size_t k = 0; k < t.size(); k++)
+    {
+        std::vector<double> u_k = {u[k]};
+
+        // y(k) = C*x + D*u
+        std::vector<double> Cx = matVec(C, x);
+        std::vector<double> Du = matVec(D, u_k);
+        y.push_back(Cx[0] + Du[0]);
+
+        // x(k+1) = x(k) + dt * (A*x + B*u)   [Eulero]
+        std::vector<double> Ax = matVec(A, x);
+        std::vector<double> Bu = matVec(B, u_k);
+        std::vector<double> dx = vecAdd(Ax, Bu);
+        x = vecAdd(x, vecScale(dx, dt));
+    }
+
+    return y;
+}
+
 // ----------------------------------
 // Funzione ausiliaria per verificare che una riga sia nulla
 // ----------------------------------
