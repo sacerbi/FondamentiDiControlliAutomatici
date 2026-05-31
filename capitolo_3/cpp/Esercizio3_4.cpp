@@ -124,7 +124,7 @@ int main()
     }
 
     // --- 1. SALVIAMO I DATI IN UN FILE ---
-    std::ofstream dataFile("esercizio3_4.txt");
+    std::ofstream dataFile("esercizio3_4.dat");
     for (size_t i = 0; i < time.size(); i++)
     {
         // Scriviamo in colonne: tempo | impulso | rampa
@@ -139,8 +139,8 @@ int main()
     scriptFile << "set ylabel 'Ampiezza'\n";
     scriptFile << "set grid\n";
     // Plottiamo entrambe le curve nello stesso grafico per confrontarle
-    scriptFile << "plot 'esercizio3_4.txt' using 1:2 with lines lw 2 title \"Impulso\", \\\n";
-    scriptFile << "     'esercizio3_4.txt' using 1:3 with lines lw 2 title \"Rampa\"\n";
+    scriptFile << "plot 'esercizio3_4.dat' using 1:2 with lines lw 2 title \"Impulso\", \\\n";
+    scriptFile << "     'esercizio3_4.dat' using 1:3 with lines lw 2 title \"Rampa\"\n";
     scriptFile.close();
 
     // --- 3. LANCIAMO GNUPLOT ---
@@ -155,7 +155,7 @@ int main()
     std::cout << "Premi INVIO per continuare..." << std::endl;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    std::remove("esercizio3_4.txt");
+    std::remove("esercizio3_4.dat");
     std::remove("plot.gp");
 
     return 0;

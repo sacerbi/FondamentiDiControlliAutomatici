@@ -4,6 +4,8 @@
 
 Questo progetto utilizza **Eigen**, una libreria C++ per l'algebra lineare. Per ulteriori informazioni e per scaricare la libreria, consultare il [sito ufficiale di Eigen](https://eigen.tuxfamily.org/).
 
+Per la stampa dei grafici si usa gnuplot.
+
 ## Installazione di Eigen
 
 Assicurarsi di avere la cartella `Eigen` disponibile nel vostro sistema. È possibile scaricarla dal repository ufficiale e posizionarla nel percorso desiderato.
