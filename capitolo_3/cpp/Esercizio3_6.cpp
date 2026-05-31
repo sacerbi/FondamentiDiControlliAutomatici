@@ -24,8 +24,8 @@ void stampaPoli(const std::vector<double> &v, std::string name)
 
 int main()
 {
-    std::vector<double> phi_min = {0.9, 13.5, 76.5, 202.5, 246.6, 108};
-    std::vector<double> phi_max = {1.1, 16.5, 93.5, 247.5, 301.4, 132};
+    std::vector<double> phi_min = {3.0, 2.0, 6.0, 1.0};
+    std::vector<double> phi_max = {4.0, 3.0, 6.0, 2.0};
 
     int order = phi_max.size();
 
