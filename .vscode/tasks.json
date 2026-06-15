@@ -14,8 +14,8 @@
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-I${workspaceFolder}/cpplib",
                 // Dipendenze Python per matplotlib-cpp su Linux (CAMBIA 3.10 CON LA TUA VERSIONE)
-                "-I/usr/include/python3.14",
-                "-lpython3.14"
+                "-I/usr/include/python3.12",
+                "-lpython3.12"
             ],
             "options": {
                 "cwd": "${fileDirname}"
