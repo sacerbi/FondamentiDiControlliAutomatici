@@ -12,7 +12,7 @@
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "-I${fileDirname}/Eigen",
+                "-I${workspaceFolder}/cpplib",
                 // Dipendenze Python per matplotlib-cpp su Linux (CAMBIA 3.10 CON LA TUA VERSIONE)
                 "-I/usr/include/python3.14",
                 "-lpython3.14"
@@ -41,7 +41,8 @@
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-I${fileDirname}",
-                "-I${fileDirname}\\Eigen"
+                "-I${workspaceFolder}\\cpplib",
+                "-Wno-template-body"
             ],
             "options": {
                 "cwd": "${fileDirname}"

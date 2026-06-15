@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/Eigen",
+                "${workspaceFolder}/cpplib",
                 "/usr/include/python3.10"
             ],
             "defines": [],
@@ -17,7 +17,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/cpplib/Eigen",
+                "${workspaceFolder}/cpplib",
                 "C:/Python314/include",
                 "C:/Python314/Lib/site-packages/numpy/_core/include"
             ],
