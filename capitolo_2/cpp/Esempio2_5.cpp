@@ -3,10 +3,18 @@
 #include <cmath>
 #include <string>
 #include <map>
-#include "matplotlibcpp.h"
+#include <cstdio>
 #include "myDiffEquation.h"
 
-namespace plt = matplotlibcpp;
+// Gestione della compatibilità cross-platform per le pipe
+#ifdef _WIN32
+#define POPEN _popen
+#define PCLOSE _pclose
+#else
+#define POPEN popen
+#define PCLOSE pclose
+#endif
+
 
 // --------------------------
 // Parametri di sistema
@@ -60,20 +68,45 @@ int main() {
         et.push_back(Ue+Up);
     }
 
-    // Plot Figura 2.4
-    plt::figure(1);
-    plt::plot(time, s, {{"label", "s(t)"}});
-    plt::plot(time, sdot, {{"label", "sdot(t)"}});
-    plt::plot(time, et, {{"label", "ET(t)"}});
-    plt::xlabel("Tempo (t)");
-    plt::ylabel("Spostamento / Velocità / Energia Totale");
-    plt::title("Comportamento del sistema carrello-molla");
-    plt::legend();
-    plt::grid(true);
-    
-    plt::show();
+    // Apre una pipe verso Gnuplot (-persist mantiene la finestra aperta alla fine)
+    FILE* gp = POPEN("gnuplot -persist", "w");
+    if (!gp) {
+        std::cerr << "Errore: Impossibile trovare Gnuplot. Assicurati che sia installato e nel PATH." << std::endl;
+        return 1;
+    }
 
-    plt::detail::_interpreter::kill();
+    // ==========================================
+    // FIGURA: Comportamento del sistema carrello-molla
+    // ==========================================
+    fprintf(gp, "set terminal qt 1 title 'Figura'\n"); // Apre la finestra Qt 1
+    fprintf(gp, "set title 'Comportamento del sistema carrello-molla'\n");
+    fprintf(gp, "set xlabel 'Tempo (t)'\n");
+    fprintf(gp, "set ylabel 'Spostamento / Velocità / Energia Totale'\n");
+    fprintf(gp, "set grid\n");
+    fprintf(gp, "set key top right\n"); // Posizione della legenda (opzionale)
+
+    fprintf(gp, "plot '-' with lines title 's(t)', '-' with lines title 'sdot(t)', '-' with lines title 'E_T(t)'\n");
+
+    // 1. Invio dei dati per la PRIMA curva
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], s[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la prima curva
+
+    // 2. Invio dei dati per la SECONDA curva
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], sdot[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la seconda curva
+
+    // 3. Invio dei dati per la TERZA curva
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], et[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la terza curva
+
+    // Fondamentale: forza lo svuotamento del buffer per disegnare subito il grafico
+    fflush(gp);
 
     return 0;
 }

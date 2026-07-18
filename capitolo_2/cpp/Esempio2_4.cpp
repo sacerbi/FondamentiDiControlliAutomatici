@@ -3,10 +3,17 @@
 #include <cmath>
 #include <string>
 #include <map>
-#include "matplotlibcpp.h"
+#include <cstdio>
 #include "myDiffEquation.h"
 
-namespace plt = matplotlibcpp;
+// Gestione della compatibilità cross-platform per le pipe
+#ifdef _WIN32
+#define POPEN _popen
+#define PCLOSE _pclose
+#else
+#define POPEN popen
+#define PCLOSE pclose
+#endif
 
 // --------------------------
 // Parametri di sistema
@@ -51,16 +58,41 @@ int main() {
     for (auto& v : y) Vc.push_back(v[0]);
     for (int i = 0; i <= N; ++i) Vr.push_back(u[i] - Vc[i]);
 
-    // Plot Figura 2.4
-    plt::figure(1);
-    plt::plot(time, Vc, {{"label", "Vc"}});
-    plt::plot(time, Vr, {{"label", "Vr"}});
-    plt::xlabel("Tempo (t)");
-    plt::ylabel("Tensione (V)");
-    plt::title("Comportamento del circuito RC");
-    plt::legend();
-    plt::grid(true);
-    
+    // Apre una pipe verso Gnuplot (-persist mantiene la finestra aperta alla fine)
+    FILE* gp = POPEN("gnuplot -persist", "w");
+    if (!gp) {
+        std::cerr << "Errore: Impossibile trovare Gnuplot. Assicurati che sia installato e nel PATH." << std::endl;
+        return 1;
+    }
+
+    // ==========================================
+    // FIGURA 2.4: Comportamento del circuito RC
+    // ==========================================
+    fprintf(gp, "set terminal qt 1 title 'Figura 2.4'\n"); // Apre la finestra Qt 1
+    fprintf(gp, "set title 'Comportamento del circuito RC'\n");
+    fprintf(gp, "set xlabel 'Tempo (t)'\n");
+    fprintf(gp, "set ylabel 'Tensione (V)'\n");
+    fprintf(gp, "set grid\n");
+    fprintf(gp, "set key top right\n"); // Posizione della legenda (opzionale)
+
+    // Diciamo a Gnuplot di aspettarsi DUE serie di dati da stdin ('-' per Vc e '-' per Vr)
+    fprintf(gp, "plot '-' with lines title 'V_c', '-' with lines title 'V_r'\n");
+
+    // 1. Invio dei dati per la PRIMA curva (Vc)
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], Vc[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la prima curva (Vc)
+
+    // 2. Invio dei dati per la SECONDA curva (Vr)
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], Vr[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la seconda curva (Vr)
+
+    // Fondamentale: forza lo svuotamento del buffer per disegnare subito il grafico
+    fflush(gp);
+
     std::vector<double> Vc_teorica(N + 1), Vr_teorica(N + 1);
     for (int i = 0; i <= N; ++i) {
         double gamma = atan(w * R * C);
@@ -70,17 +102,34 @@ int main() {
         Vc_teorica[i] = mode * x0 + modeGain * mode + amp * sin(w * time[i] - gamma);
         Vr_teorica[i] = -mode * x0 - modeGain * mode + amp * w * R * C * cos(w * time[i] - gamma);
     }
-    // Plot Figura 2.4 - Teorica
-    plt::figure(2);
-    plt::plot(time, Vc_teorica, {{"label", "Vc teorica"}});
-    plt::plot(time, Vr_teorica, {{"label", "Vr teorica"}});
-    plt::xlabel("Tempo (t)");
-    plt::ylabel("Tensione (V)");
-    plt::title("Comportamento del circuito RC");
-    plt::legend();
-    plt::grid(true);
 
-    plt::show();
+    // =================================================
+    // FIGURA 2.4: Comportamento teorico del circuito RC
+    // =================================================
+    fprintf(gp, "set terminal qt 2 title 'Figura 2.4'\n"); // Apre la finestra Qt 1
+    fprintf(gp, "set title 'Comportamento del circuito RC'\n");
+    fprintf(gp, "set xlabel 'Tempo (t)'\n");
+    fprintf(gp, "set ylabel 'Tensione (V)'\n");
+    fprintf(gp, "set grid\n");
+    fprintf(gp, "set key top right\n"); // Posizione della legenda (opzionale)
+
+    // Diciamo a Gnuplot di aspettarsi DUE serie di dati da stdin ('-' per Vc e '-' per Vr)
+    fprintf(gp, "plot '-' with lines title 'V_c teorica', '-' with lines title 'V_r teorica'\n");
+
+    // 1. Invio dei dati per la PRIMA curva (Vc)
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], Vc_teorica[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la prima curva (Vc)
+
+    // 2. Invio dei dati per la SECONDA curva (Vr)
+    for (size_t i = 0; i < time.size(); ++i) {
+        fprintf(gp, "%f %f\n", time[i], Vr_teorica[i]);
+    }
+    fprintf(gp, "e\n"); // 'e' comunica la fine dei dati per la seconda curva (Vr)
+
+    // Fondamentale: forza lo svuotamento del buffer per disegnare subito il grafico
+    fflush(gp);
 
     double error_Vc = 0.0;
     double error_Vr = 0.0;
