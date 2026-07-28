@@ -5,14 +5,14 @@ function Esempio4_10()
 
   % --- Condizioni iniziali che restano nel bacino di attrazione dell'origine ---
   % Vengono simulate a lungo (T = 20)
-  x10 = [-2 2 -2    2];
-  x20 = [ 0 0 0.1 -0.1];
+  x10 = [-0.99, -2.0, -2.0, -1.5, -2.0, -2.0, -1.5, -1.0, -1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 2.0];
+  x20 = [0.0, 1.48, 1.8, 2.0, -1.48, -1.8, -2.0, 2.0, -2.0, 2.0, -2.0, 2.0, -2.0, 1.5, -1.5];
 
   % --- Condizioni iniziali che escono dal bacino di attrazione ---
-  % La traiettoria diverge (finite escape time attorno a t ~ 2.4s),
-  % quindi si simula solo fino a T = 2.2
-  x10a = [2 -2];
-  x20a = [1 -1];
+  % La traiettoria diverge (finite escape time attorno a t ~ 4s),
+  % quindi si simula solo fino a T = 4
+  x10a = [-2.0, -2.0, -2.0, -2.0, -1.01];
+  x20a = [-1.45, 1.45, -1.42, 1.42, 0.0];
 
   x1 = {};
   x2 = {};
@@ -26,9 +26,9 @@ function Esempio4_10()
     legends{i} = ['x_1(0) = ' num2str(x10(i)) ', x_2(0) = ' num2str(x20(i))];
   endfor
 
-  % Simulazioni con durata T = 2.2 (traiettorie divergenti)
+  % Simulazioni con durata T = 4 (traiettorie divergenti)
   for i = 1:length(x10a)
-    [~, X] = ode45(@sistema, [0 2.2], [x10a(i) x20a(i)]);
+    [~, X] = ode45(@sistema, [0 4], [x10a(i) x20a(i)]);
     x1{i+length(x10)} = X(:,1);
     x2{i+length(x10)} = X(:,2);
     legends{i+length(x10)} = ['x_1(0) = ' num2str(x10a(i)) ', x_2(0) = ' num2str(x20a(i))];
@@ -41,37 +41,27 @@ function Esempio4_10()
   for n = 1:length(x1)
     plot(x1{n}, x2{n})
   endfor
-  axis([-4 4 -4 4])
+  axis([-2 2 -2 2])
   xlabel('x_1'), ylabel('x_2')
 
-  % --- Linea di livello V(x) = 2.2 ---
-  xx = -4:0.1:4;
-  yy = -4:0.1:4;
-  P = [3 -1; -1 2];
+  % --- Linea di livello V(x) ---
+  xx = -2:0.1:2;
+  yy = -2:0.1:2;
   z = zeros(length(xx), length(yy));
   for i = 1:length(xx)
     for j = 1:length(yy)
-      z(i,j) = 0.5 * [xx(i) yy(j)] * P * [xx(i) yy(j)]';
+      z(i,j) = 0.5 * [xx(i)*xx(i) + yy(j)*yy(j)];
     endfor
   endfor
-  contour(xx, yy, z', [2.2 2.2], 'r');
+  contour(xx, yy, z', [0.25,0.5,2], 'r');
 
-  % --- Linea di livello V_punto(x) = 0 ---
-  zp = zeros(length(xx), length(yy));
-  for i = 1:length(xx)
-    for j = 1:length(yy)
-      zp(i,j) = -xx(i)^2 - yy(j)^2 - xx(i)^3*yy(j) + 2*xx(i)^2*yy(j)^2;
-    endfor
-  endfor
-  contour(xx, yy, zp', [0 0], 'g');
-
-  legend(legends, 'Location', 'SouthEast');
+  legend(legends, 'Location', 'SouthEastOutside');
   hold off
 endfunction
 
 function [xp] = sistema(t, x)
-  %   x1dot(t) = -x2(t)
-  %   x2dot(t) = x1(t) - x2(t) + x1(t)^2*x2(t)
-  xp = [ -x(2) ...
-         x(1)*x(1)*x(2) + x(1) - x(2)];
+  %   x1dot(t) = -x1(t)(x1(t) + u(t)) + x2(t)^2
+  %   x2dot(t) = -(x1(t) + 2u(t))x2(t)
+  xp = [ -x(1)*(x(1) + 1) + x(2)*x(2) ...
+        -(x(1) + 2*1)*x(2)];
 endfunction
