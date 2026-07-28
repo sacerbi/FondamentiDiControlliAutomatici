@@ -1,4 +1,4 @@
-function Esempio4_10_octave()
+function Esempio4_10()
   close all
   clear all
   clc
